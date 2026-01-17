@@ -298,17 +298,6 @@ where
             let mut children = layout.children();
             let title_bar_layout = children.next().unwrap();
 
-            let is_over_pick_area = cursor
-                .position()
-                .map(|cursor_position| {
-                    title_bar.is_over_pick_area(title_bar_layout, cursor_position)
-                })
-                .unwrap_or_default();
-
-            if is_over_pick_area && drag_enabled {
-                return mouse::Interaction::Grab;
-            }
-
             let mouse_interaction = title_bar.mouse_interaction(
                 &tree.children[1],
                 title_bar_layout,
@@ -316,6 +305,19 @@ where
                 viewport,
                 renderer,
             );
+
+            if mouse_interaction == mouse::Interaction::None && drag_enabled {
+                let is_over_pick_area = cursor
+                    .position()
+                    .map(|cursor_position| {
+                        title_bar.is_over_pick_area(title_bar_layout, cursor_position)
+                    })
+                    .unwrap_or_default();
+
+                if is_over_pick_area {
+                    return mouse::Interaction::Grab;
+                }
+            }
 
             (children.next().unwrap(), mouse_interaction)
         } else {
